@@ -1,0 +1,12 @@
+#cloud-config
+users:
+  - name: pavel
+    groups: sudo
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH1aldsXuAs62u6zs8rqqAzylhg6foOlY8uOqCadg4MY jonyblaze2019@gmail.com
+runcmd:
+  - IMG_URL=$(curl -H "Metadata-Flavor: Google" http://169.254.169)
+  - echo "<html><body><h1>Привет!</h1><img src=\"$IMG_URL\"></body></html>" > /var/www/html/index.html
+  - systemctl restart httpd

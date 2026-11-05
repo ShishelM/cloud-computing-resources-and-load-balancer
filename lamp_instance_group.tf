@@ -1,7 +1,9 @@
 resource "yandex_compute_instance_group" "lamp-group" {
   name               = "lamp-instance-group"
   folder_id          = var.folder_id
-  service_account_id = yandex_iam_service_account.sa-bucket.id
+  service_account_id = "aje5o7qhck12gn158ksm" # ID твоего робота pavel
+
+  depends_on = [yandex_storage_object.lamp-image]
 
   instance_template {
     platform_id = "standard-v1"
@@ -23,20 +25,20 @@ resource "yandex_compute_instance_group" "lamp-group" {
     network_interface {
       network_id = yandex_vpc_network.vpc-network.id
       subnet_ids = [yandex_vpc_subnet.public-subnet.id]
-      nat        = true
+      nat        = false # ПУБЛИЧНЫЕ IP УБРАНЫ ДЛЯ БЕЗОПАСНОСТИ
     }
 
+
     metadata = {
-      user-data          = file("./cloud-init.yml")
+      user-data          = templatefile("./cloud-init.tftpl", {
+        bucket_image_url = "https://${yandex_storage_bucket.lamp-bucket.bucket_domain_name}/${yandex_storage_object.lamp-image.key}"
+      })
       serial-port-enable = 1
-      bucket_img_url     = "https://${yandex_storage_bucket.lamp-bucket.bucket_domain_name}/${yandex_storage_object.lamp-image.key}"
     }
   }
 
-  # Обязательный блок для создания связи с Network Load Balancer!
   load_balancer {
-    target_group_name        = "lamp-tg"
-    target_group_description = "Целевая группа для сетевого балансировщика"
+    target_group_name = "lamp-tg"
   }
 
   scale_policy {
@@ -51,19 +53,19 @@ resource "yandex_compute_instance_group" "lamp-group" {
 
   deploy_policy {
     max_unavailable = 1
-    max_creating    = 1
+    max_creating    = 3
     max_expansion   = 1
     max_deleting    = 1
   }
 
   health_check {
-    interval            = 10
-    timeout             = 2
-    unhealthy_threshold = 3
+    interval            = 15
+    timeout             = 5
+    unhealthy_threshold = 5
     healthy_threshold   = 2
     http_options {
       port = 80
-      path = "/index.html"
+      path = "/index.html" # Будет проверять наш сгенерированный файл
     }
   }
 }

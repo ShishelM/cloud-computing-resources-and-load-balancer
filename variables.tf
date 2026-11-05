@@ -22,7 +22,7 @@ variable "bucket_name" {
   default     = "shishelm-bucket-2026-11"
 }
 
-# Единый объект параметров для одиночных ВМ и инстанс-группы
+# Экономные ресурсы под лимиты квот (20 ГБ HDD / 10 ГБ SSD)
 variable "vms_resources" {
   type = map(object({
     cores         = number
@@ -36,13 +36,13 @@ variable "vms_resources" {
       cores         = 2
       memory        = 2
       core_fraction = 20
-      disk_size     = 10
+      disk_size     = 5  # Уменьшаем до 5 ГБ (пойдет на SSD)
     }
     lamp_group = {
       cores         = 2
       memory        = 2
       core_fraction = 20
-      disk_size     = 10
+      disk_size     = 5  # 3 машины по 5 ГБ = 15 ГБ HDD (лимит 20)
     }
   }
 }

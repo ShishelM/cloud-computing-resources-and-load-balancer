@@ -14,6 +14,7 @@ resource "yandex_compute_instance" "nat-instance" {
     initialize_params {
       image_id = "fd80mrhj8fl2oe87o4e1"
       size     = var.vms_resources["infrastructure"].disk_size
+      type     = "network-ssd"
     }
   }
 
@@ -45,6 +46,7 @@ resource "yandex_compute_instance" "public-vm" {
     initialize_params {
       image_id = "fd827b91d99psvq5fjit"
       size     = var.vms_resources["infrastructure"].disk_size
+      type     = "network-ssd"
     }
   }
 
